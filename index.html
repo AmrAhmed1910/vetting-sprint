@@ -1,0 +1,806 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Vetting Sprint</title>
+<meta name="theme-color" content="#2F55D4">
+<meta name="description" content="Amr's 30-day job-readiness sprint for micro1, Turing, Crossover and Arc.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Sprint">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;-webkit-tap-highlight-color:transparent}
+/* Layout: one narrow column, sticky score strip with a locked level path, one level shown at a time */
+:root{
+  --bg:#F3F5FA; --surface:#FFFFFF; --sunk:#E8ECF5; --line:#D5DBE8;
+  --fg:#131A2C; --muted:#5A6480;
+  --accent:#2F55D4; --accent-ink:#FFFFFF; --accent-soft:#DFE6FC;
+  --good:#1F8A5B; --good-soft:#D8F1E5; --warn:#B26A00; --warn-soft:#FBEBCF; --hot:#C2410C;
+  --f-display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0E1220; --surface:#161C2E; --sunk:#1D2438; --line:#2A3350;
+  --fg:#E7EBF5; --muted:#98A2BE;
+  --accent:#7D98FF; --accent-ink:#0E1220; --accent-soft:#232F57;
+  --good:#4CC890; --good-soft:#163A2B; --warn:#F0B354; --warn-soft:#3A2C12; --hot:#FB8A55;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1220; --surface:#161C2E; --sunk:#1D2438; --line:#2A3350;
+  --fg:#E7EBF5; --muted:#98A2BE;
+  --accent:#7D98FF; --accent-ink:#0E1220; --accent-soft:#232F57;
+  --good:#4CC890; --good-soft:#163A2B; --warn:#F0B354; --warn-soft:#3A2C12; --hot:#FB8A55;
+  color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.5}
+.wrap{max-width:760px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
+h1{font-size:1.75rem;font-weight:800;letter-spacing:-.02em}
+h2{font-size:1.25rem;font-weight:800}
+h3{font-size:1rem;font-weight:600}
+.eyebrow{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.muted{color:var(--muted)}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+a{color:var(--accent)}
+
+header.top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.sync{font-family:var(--f-mono);font-size:.7rem;color:var(--muted)}
+
+.score{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:12px 8px;margin-top:12px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-width:0}
+.stat b{display:block;font-family:var(--f-mono);font-size:1.25rem;font-variant-numeric:tabular-nums}
+.stat span{font-size:.72rem;color:var(--muted)}
+.bar{height:6px;border-radius:3px;background:var(--sunk);margin-top:10px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);transition:width .3s}
+.tabs{display:flex;gap:4px;overflow-x:auto;margin-top:10px;scrollbar-width:none}
+.tabs button{border:0;background:transparent;padding:7px 12px;border-radius:999px;white-space:nowrap;font-weight:500;color:var(--muted)}
+.tabs button[aria-selected="true"]{background:var(--fg);color:var(--bg)}
+
+section.view{margin-top:16px;display:grid;gap:14px}
+.daynav{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.daynav button{border:1px solid var(--line);background:var(--surface);border-radius:8px;width:38px;height:38px}
+.week-tag{display:inline-block;font-family:var(--f-mono);font-size:.72rem;padding:2px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent);margin-top:4px}
+.flag{display:flex;gap:10px;align-items:flex-start;background:var(--warn-soft);color:var(--fg);border-radius:10px;padding:10px 12px;font-size:.9rem}
+.flag strong{color:var(--warn)}
+.block{display:grid;grid-template-columns:auto 1fr;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;align-items:start}
+.block.done{border-color:var(--good);background:linear-gradient(0deg,var(--good-soft),var(--good-soft)) , var(--surface)}
+.check{width:28px;height:28px;border-radius:8px;border:2px solid var(--line);background:var(--surface);display:grid;place-items:center;font-weight:700;color:var(--accent-ink);flex:none}
+.block.done .check{background:var(--good);border-color:var(--good)}
+.block .meta{font-family:var(--f-mono);font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.block p{margin:2px 0 0;min-width:0}
+textarea{width:100%;min-height:80px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--fg);padding:10px;font:inherit;resize:vertical}
+
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.cal button{aspect-ratio:1;border:1px solid var(--line);background:var(--surface);border-radius:8px;font-family:var(--f-mono);font-size:.85rem;position:relative;padding:0;max-width:100%}
+.cal button.p1{background:var(--accent-soft)}
+.cal button.p3{background:var(--good);color:var(--accent-ink);border-color:var(--good)}
+.cal button.today{outline:2px solid var(--fg);outline-offset:1px}
+.cal button.ms::after{content:"";position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--hot)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.78rem;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+
+.list{display:grid;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface)}
+.row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:10px 14px;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.row .name{min-width:0}
+.row .name a{text-decoration:none;color:var(--fg);font-weight:500}
+.row .name small{display:block;color:var(--muted);font-size:.75rem}
+.grp{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:12px 14px 4px;background:var(--sunk);border-top:1px solid var(--line)}
+.grp:first-child{border-top:0}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:var(--surface);padding:5px 9px;font-size:.78rem;font-family:var(--f-mono);color:var(--muted)}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button.on{background:var(--accent);color:var(--accent-ink)}
+.seg button.on.g{background:var(--good)}
+.seg button.on.w{background:var(--warn);color:var(--accent-ink)}
+.due{background:var(--warn-soft);border-radius:12px;padding:12px 14px}
+.due ul{margin:6px 0 0;padding-left:18px}
+
+.ms{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center}
+.ms .d{font-family:var(--f-mono);font-size:.8rem;color:var(--muted);width:3.2em}
+.pill{font-family:var(--f-mono);font-size:.7rem;padding:2px 8px;border-radius:999px;background:var(--sunk);color:var(--muted)}
+.pill.ok{background:var(--good-soft);color:var(--good)}
+
+.cheat{counter-reset:c;display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.cheat li{display:grid;grid-template-columns:2em 1fr;gap:8px;padding:10px 14px;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.cheat li::before{counter-increment:c;content:counter(c);font-family:var(--f-mono);color:var(--accent);font-weight:700}
+.prompt{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;gap:8px}
+.prompt code{font-family:var(--f-mono);font-size:.8rem;background:var(--sunk);padding:10px;border-radius:8px;white-space:pre-wrap;word-break:break-word;display:block}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 12px;font-weight:500;justify-self:start}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.settings{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.settings input{border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:8px;padding:6px 8px;font:inherit}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:999px;font-size:.85rem;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:1}
+.zcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:12px}
+.zcard.result{border-color:var(--accent)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--sunk);border-radius:999px;padding:7px 12px;font-weight:500}
+.chip:hover{border-color:var(--accent)}
+.chip .mono{color:var(--muted);font-size:.75rem;margin-left:4px}
+.settings label{display:flex;gap:8px;align-items:center;font-size:.88rem}
+.zhead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.zhead>div{min-width:0}
+.chat{display:grid;gap:10px}
+.msg{max-width:88%;padding:10px 14px;border-radius:14px;white-space:pre-wrap;word-break:break-word}
+.msg .who{display:block;font-family:var(--f-mono);font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.msg.zara{background:var(--surface);border:1px solid var(--line);border-bottom-left-radius:4px;justify-self:start}
+.msg.amr{background:var(--accent-soft);border-bottom-right-radius:4px;justify-self:end}
+.msg.thinking{color:var(--muted);animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.5}}
+.answer{display:grid;gap:8px}
+.tline{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.tbar{margin-top:0}.tbar i{background:var(--warn)}
+.zbtns{display:flex;flex-wrap:wrap;gap:8px}
+.sc{display:inline-grid;place-items:center;min-width:26px;height:26px;padding:0 8px;border-radius:999px;font-family:var(--f-mono);font-weight:700;font-size:.8rem}
+.sc.big{font-size:.95rem;height:32px;padding:0 14px}
+.sc.s0{background:var(--hot);color:var(--accent-ink)}
+.sc.s1{background:var(--warn-soft);color:var(--warn)}
+.sc.s2{background:var(--good-soft);color:var(--good)}
+.zfocus{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+.zfocus li{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start}
+.zfocus small{display:block;color:var(--muted)}
+.lvmap{display:flex;align-items:center;margin-top:12px;gap:0}
+.lvline{flex:1;height:2px;background:var(--line);min-width:6px}
+.lv{display:flex;flex-direction:column;align-items:center;gap:4px;border:0;background:transparent;padding:0;flex:none}
+.lvdot{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-mono);font-weight:700;font-size:.85rem;border:2px solid var(--line);background:var(--surface);color:var(--muted)}
+.lvname{font-size:.7rem;font-family:var(--f-mono);color:var(--muted);white-space:nowrap}
+.lv.done .lvdot{background:var(--good);border-color:var(--good);color:var(--accent-ink)}
+.lv.current .lvdot{border-color:var(--accent);color:var(--accent)}
+.lv.locked{cursor:not-allowed}.lv.locked .lvdot{background:var(--sunk);opacity:.75}
+.lv.sel .lvdot{box-shadow:0 0 0 3px var(--accent-soft)}
+.lv.sel .lvname{color:var(--fg);font-weight:700}
+.days{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.dpill{width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-family:var(--f-mono);display:grid;place-items:center;position:relative;padding:0}
+.dpill.p1{background:var(--accent-soft)}
+.dpill.p3{background:var(--good);border-color:var(--good);color:var(--accent-ink)}
+.dpill.locked{background:var(--sunk);color:var(--muted);cursor:not-allowed}
+.dpill.sel{outline:2px solid var(--fg);outline-offset:1px}
+.dpill.gate::after{content:"";position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--hot)}
+.lockcard{display:flex;gap:12px;align-items:flex-start;border:1px dashed var(--line);border-radius:12px;padding:14px;color:var(--fg)}
+.lockcard>svg{flex:none;margin-top:3px;color:var(--muted)}
+.bbody{min-width:0;display:grid;gap:8px}
+.plist{display:grid;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.prow{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:8px 10px;border-top:1px solid var(--line)}
+.prow:first-child{border-top:0}
+.prow .name{min-width:0}.prow .name a{text-decoration:none;color:var(--fg);font-weight:500}
+.prow small{display:block;color:var(--muted);font-size:.72rem}
+.skipnote{background:var(--good-soft);color:var(--fg);border-radius:8px;padding:8px 10px;font-size:.85rem}
+.pdet summary{cursor:pointer;font-size:.85rem;color:var(--accent);font-weight:500}
+.pdet[open]{display:grid;gap:8px}
+.pdet code{font-family:var(--f-mono);font-size:.78rem;background:var(--sunk);padding:10px;border-radius:8px;white-space:pre-wrap;word-break:break-word;display:block;margin-top:8px}
+.keybox{display:grid;gap:8px;background:var(--sunk);border-radius:10px;padding:12px}
+.foot{margin-top:28px;color:var(--muted);font-size:.85rem}.foot summary{cursor:pointer}
+main.view{margin-top:16px;display:grid;gap:14px}
+.rankbtn{text-align:left;font:inherit;color:inherit;cursor:pointer;display:block}
+.rankbtn:hover{border-color:var(--accent)}
+.rankbtn span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rankbar{display:block;height:3px;border-radius:2px;background:var(--sunk);margin-top:4px;overflow:hidden}
+.rankbar i{display:block;height:100%;background:var(--accent);transition:width .4s}
+.flame{width:16px;height:16px;margin-left:4px;vertical-align:-1px;fill:var(--line)}
+.flame.lit{fill:var(--hot)}
+.xpfloat{position:fixed;z-index:30;pointer-events:none;font-family:var(--f-mono);font-weight:700;font-size:.9rem;color:var(--good);animation:xpup 1.1s ease-out forwards}
+.xpfloat.neg{color:var(--muted)}
+@keyframes xpup{0%{opacity:0;transform:translateY(6px) scale(.9)}15%{opacity:1;transform:translateY(0) scale(1.1)}100%{opacity:0;transform:translateY(-46px) scale(1)}}
+.confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:40}
+.badgetoast{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top,0px));transform:translate(-50%,-140%);z-index:35;display:flex;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--warn);border-radius:14px;padding:10px 14px;box-shadow:0 10px 30px rgba(0,0,0,.18);transition:transform .35s cubic-bezier(.2,.9,.3,1.2);max-width:calc(100% - 32px)}
+.badgetoast.show{transform:translate(-50%,0)}
+.badgetoast b{display:block}.badgetoast span{display:block;font-size:.8rem;color:var(--muted)}
+.medal{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:var(--warn-soft);color:var(--warn);flex:none}
+.medal svg{width:20px;height:20px;fill:currentColor}
+.overlay{position:fixed;inset:0;z-index:38;background:rgba(10,14,28,.55);display:grid;place-items:center;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:calc(16px + env(safe-area-inset-top,0px)) calc(16px + env(safe-area-inset-bottom,0px))}
+.ocard{background:var(--surface);color:var(--fg);border-radius:18px;padding:22px;display:grid;gap:12px;width:100%;max-width:420px;text-align:center;justify-items:center;animation:pop .35s cubic-bezier(.2,.9,.3,1.3)}
+.ocard h2{font-size:1.8rem}
+.ocard.tall{max-width:560px;text-align:left;justify-items:stretch;max-height:100%;overflow:auto}
+@keyframes pop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+.tbody{display:grid;gap:10px}
+.ladder{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.ladder li{display:flex;justify-content:space-between;padding:6px 10px;border-radius:8px;color:var(--muted)}
+.ladder li.past{color:var(--fg)}
+.ladder li.now{background:var(--accent);color:var(--accent-ink);font-weight:600}
+.badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.badge{border:1px solid var(--line);border-radius:12px;padding:10px;display:grid;gap:4px;justify-items:start;opacity:.55}
+.badge .medal{background:var(--sunk);color:var(--muted)}
+.badge.got{opacity:1;border-color:var(--warn)}
+.badge.got .medal{background:var(--warn-soft);color:var(--warn)}
+.badge small{color:var(--muted);font-size:.75rem}
+.boss{border:2px solid var(--hot);border-radius:14px;padding:14px;display:grid;gap:10px;background:var(--surface)}
+.boss.down{border-color:var(--good)}
+.bosstop{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.bosstop .mono{color:var(--hot);font-weight:700}.boss.down .bosstop .mono{color:var(--good)}
+.hp{height:10px;border-radius:5px;background:var(--sunk);overflow:hidden}
+.hp i{display:block;height:100%;background:var(--hot);transition:width .4s}
+.boss .btn{justify-self:start}
+@media (max-width:460px){.lvname{font-size:.62rem}.lvdot{width:30px;height:30px}}
+@media (max-width:460px){.stat b{font-size:1.05rem}h1{font-size:1.45rem}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">micro1 · Turing · Crossover · Arc</div>
+      <h1>Vetting Sprint</h1>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+      <div class="seg" id="themeSeg" role="group" aria-label="Theme">
+        <button data-theme-set="auto">Auto</button><button data-theme-set="light">Light</button><button data-theme-set="dark">Dark</button>
+      </div>
+      <div class="sync" id="sync">Saved on this device</div>
+    </div>
+  </header>
+
+  <div class="score">
+    <div class="stats">
+      <div class="stat"><b id="sDay">—</b><span id="sDayLbl">baseline</span></div>
+      <div class="stat"><b><span id="sStreak">0</span><svg id="flame" class="flame" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 5 5.5 5 11a5 5 0 0 1-10 0c0-2.6 1.2-4 2.4-5.2.2 1.7 1 2.7 2 3.2C11 8 11.2 5 12 2z"/></svg></b><span>day streak</span></div>
+      <button class="stat rankbtn" id="rankBtn" aria-label="Open trophy room"><b id="sXp">0</b><span id="sLvl">Intern</span><i class="rankbar"><i id="rankFill"></i></i></button>
+      <div class="stat"><b id="sProb">0/40</b><span>problems</span></div>
+    </div>
+    <div class="bar" aria-hidden="true"><i id="pbar" style="width:0%"></i></div>
+    <nav class="lvmap" id="lvmap" aria-label="Levels"></nav>
+  </div>
+  <main id="main" class="view"></main>
+  <details class="foot"><summary>Settings</summary>
+    <div class="zcard" style="margin-top:10px">
+      <div><div class="eyebrow">Zara · Anthropic API key</div><div class="mono" id="keyState" style="font-size:.85rem">Not set</div></div>
+      <div class="settings"><input id="keyIn2" type="password" placeholder="Paste a new key (empty removes it)" autocomplete="off" style="flex:1;min-width:0"><button class="btn" id="keyEdit">Save</button></div>
+      <div class="settings"><label for="modelIn" style="font-size:.85rem">Model</label><input id="modelIn" style="flex:1;min-width:0"></div>
+    </div>
+    <div class="zcard" style="margin-top:10px">
+      <div><div class="eyebrow">Backup</div><p class="muted" style="margin:0;font-size:.85rem">Progress lives on this phone. Save a backup before switching phones or clearing browser data.</p></div>
+      <div class="settings"><button class="btn" id="exportBtn">Save backup file</button><button class="btn" id="importBtn">Restore from file</button><input type="file" id="importFile" accept="application/json,.json" hidden></div>
+    </div>
+    <div class="settings" style="margin-top:10px"><button class="btn" id="resetBtn">Reset all progress</button><span id="resetAsk" hidden>Sure? <button class="btn" id="resetYes">Yes, reset</button> <button class="btn" id="resetNo">Keep it</button></span></div>
+  </details>
+</div>
+<div class="toast" id="toast" role="status"></div>
+<div class="badgetoast" id="badgeToast" role="status"><div class="medal"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.9 6.1 6.6.8-4.9 4.6 1.3 6.5L12 16.8 6.1 20l1.3-6.5L2.5 8.9l6.6-.8z"/></svg></div><div><div class="eyebrow">Badge unlocked</div><b></b><span></span></div></div>
+<div class="overlay" id="celebrate" hidden><div class="ocard" role="dialog" aria-modal="true" aria-labelledby="celH"><div class="eyebrow ck">Promotion</div><h2 id="celH"></h2><p class="muted" style="margin:0"></p><button class="btn primary" data-close="celebrate">Keep going</button></div></div>
+<div class="overlay" id="trophies" hidden><div class="ocard tall" role="dialog" aria-modal="true" aria-labelledby="trH"><div class="zhead"><h2 id="trH">Trophy room</h2><button class="btn" data-close="trophies">Close</button></div><div id="trophyBody" class="tbody"></div></div></div>
+
+<script>
+/* ---------- Plan data ---------- */
+const WEEKS=["Speak and solve","Depth + LedgerLite v1","Breadth + engineering hygiene","Simulate and ship"];
+const DAYS=[
+["Self-assessment (30 min) + Two Sum, Valid Anagram, talking aloud and recorded","Write the 90-second OnSite Solutions pitch; have Claude grill you on it","Set up your notes deck and this tracker"],
+["Contains Duplicate, Valid Palindrome, Best Time to Buy/Sell Stock","Java core: equals/hashCode, HashMap internals, String pool","Claude 10-question Java MCQ (Turing style)"],
+["Group Anagrams, Top K Frequent Elements","Java Streams, Optional, exceptions","Re-solve Day 1 problems from memory"],
+["Valid Parentheses, Min Stack","Spring core: bean scopes, DI, auto-config, profiles, Actuator","Spring MCQ drill"],
+["Longest Substring Without Repeating Characters, Product of Array Except Self","@Transactional propagation and self-invocation; JPA N+1, @Version","Explain-it-back: why does @Transactional fail on self-calls?"],
+["3Sum, Container With Most Water","Rewrite resume, LinkedIn and GitHub (outcome + scale + tech)","Review missed MCQs"],
+["micro1 free practice interview (~18 min) + debrief","Re-solve your 3 weakest problems, timed","Weekly boss quiz (20 questions)"],
+["Binary Search, Search in Rotated Sorted Array","LedgerLite: Spring Boot 3 init, Postgres via docker-compose, Account/Entry entities","Quiz: indexes"],
+["Reverse Linked List, Merge Two Sorted Lists, Linked List Cycle","DB depth: composite indexes, EXPLAIN, isolation levels and anomalies","Explain-it-back: phantom read"],
+["Invert Binary Tree, Maximum Depth, Balanced Binary Tree","LedgerLite: double-entry posting + idempotent POST /payments","Claude code review"],
+["Level Order Traversal, Validate BST","Caching: cache-aside, TTL, invalidation, stampede; Redis for balances","Quiz: caching"],
+["LCA of a BST, Time Based Key-Value Store","Auth: JWT vs session, OAuth2 tokens, multi-tenant RBAC, OWASP Top 10","Explain-it-back: refresh-token rotation"],
+["Mock Zara interview with Claude (25 min) + debrief","Patch weak answers; prepare 3 STAR stories","Spaced-repetition review"],
+["Real micro1 interview (Java/Spring Boot backend)","Debrief: write down every question you were asked","Re-solve 2 problems"],
+["Number of Islands, Flood Fill","JUnit 5 + Mockito unit tests for the posting service","Quiz: test doubles"],
+["Rotting Oranges, Course Schedule","Testcontainers integration test with real Postgres","Explain-it-back: unit vs integration"],
+["Kth Largest Element, K Closest Points to Origin","Multi-stage Dockerfile + compose (app, Postgres, Redis)","Docker MCQ drill"],
+["Crossover CCAT (15 min) + Merge Intervals","GitHub Actions: build, test, cache; status badge","Review"],
+["Insert Interval, Climbing Stairs","Python refresh: re-solve 3 earlier problems in Python","Python gotchas quiz"],
+["House Robber, Coin Change","Concurrency: locks, ConcurrentHashMap, CompletableFuture; optimistic-lock retry","Explain-it-back: deadlock"],
+["Timed mock: 2 unseen mediums in 60 min, talking aloud","Node event loop + async staples","Weekly boss quiz"],
+["Turing profile + experience survey + Java/Spring Boot MCQs","Debrief missed topics","Review"],
+["LRU Cache, Implement Trie","System design: URL shortener at junior depth","Quiz"],
+["Clone Graph, Subsets","System design: your multi-tenant ledger (tenancy, outbox, replicas)","Explain-it-back"],
+["Code-review drill: find 8 issues in a buggy Spring service","LedgerLite README: diagram, trade-offs, how to run","Spaced repetition"],
+["Full Turing-style mock: 2 problems / 60 min + 10 MCQs","Behavioral: 3 STAR stories, why remote, timezone overlap","Fix weak spots"],
+["Turing coding challenge","Debrief","Rest / review"],
+["Arc.dev communication video + profile","Apply to 2–3 micro1/Turing AI-coding listings","Weekly boss quiz"],
+["Re-solve 6 flagged problems, cold and timed","Final mock Zara (full-stack angle)","Cheat-sheet review"],
+["Retrospective + next-30-day plan","Buffer for anything that slipped","Celebrate the streak"]
+];
+const BLOCKS=[["A","60 min"],["B","40 min"],["C","20 min"]];
+const GATES=[
+ {d:7,t:"micro1 practice interview",n:"Free, ~18 minutes. Low stakes, high information."},
+ {d:14,t:"micro1 Zara interview",n:"One screen, camera on, extensions off. Keep talking."},
+ {d:18,t:"Crossover CCAT",n:"15-minute cognitive test. Practice gate."},
+ {d:22,t:"Turing stack MCQs",n:"Some questions have several correct answers. A fail means 90 days' wait."},
+ {d:27,t:"Turing coding challenge",n:"Only if Day 26's mock went well."},
+ {d:28,t:"Arc.dev profile + video",n:"LedgerLite should be public with a green CI badge."},
+];
+const GATE_DAYS=new Set(GATES.map(g=>g.d));
+const P=[
+ ["Arrays & hashing",[["Two Sum","two-sum","E"],["Contains Duplicate","contains-duplicate","E"],["Valid Anagram","valid-anagram","E"],["Group Anagrams","group-anagrams","M"],["Top K Frequent Elements","top-k-frequent-elements","M"],["Product of Array Except Self","product-of-array-except-self","M"]]],
+ ["Two pointers & sliding window",[["Valid Palindrome","valid-palindrome","E"],["3Sum","3sum","M"],["Container With Most Water","container-with-most-water","M"],["Best Time to Buy and Sell Stock","best-time-to-buy-and-sell-stock","E"],["Longest Substring Without Repeating Characters","longest-substring-without-repeating-characters","M"]]],
+ ["Stack",[["Valid Parentheses","valid-parentheses","E"],["Min Stack","min-stack","M"]]],
+ ["Binary search",[["Binary Search","binary-search","E"],["Search in Rotated Sorted Array","search-in-rotated-sorted-array","M"],["Time Based Key-Value Store","time-based-key-value-store","M"]]],
+ ["Linked list",[["Reverse Linked List","reverse-linked-list","E"],["Merge Two Sorted Lists","merge-two-sorted-lists","E"],["Linked List Cycle","linked-list-cycle","E"]]],
+ ["Trees",[["Invert Binary Tree","invert-binary-tree","E"],["Maximum Depth of Binary Tree","maximum-depth-of-binary-tree","E"],["Balanced Binary Tree","balanced-binary-tree","E"],["Binary Tree Level Order Traversal","binary-tree-level-order-traversal","M"],["Validate Binary Search Tree","validate-binary-search-tree","M"],["Lowest Common Ancestor of a BST","lowest-common-ancestor-of-a-binary-search-tree","M"]]],
+ ["Graphs",[["Number of Islands","number-of-islands","M"],["Flood Fill","flood-fill","E"],["Rotting Oranges","rotting-oranges","M"],["Course Schedule","course-schedule","M"],["Clone Graph","clone-graph","M"]]],
+ ["Heap",[["Kth Largest Element in an Array","kth-largest-element-in-an-array","M"],["K Closest Points to Origin","k-closest-points-to-origin","M"]]],
+ ["Intervals",[["Merge Intervals","merge-intervals","M"],["Insert Interval","insert-interval","M"]]],
+ ["Intro DP",[["Climbing Stairs","climbing-stairs","E"],["House Robber","house-robber","M"],["Coin Change","coin-change","M"]]],
+ ["Design & backtracking",[["LRU Cache","lru-cache","M"],["Implement Trie","implement-trie-prefix-tree","M"],["Subsets","subsets","M"]]],
+ ["Stretch · weekends only",[["Daily Temperatures","daily-temperatures","M"],["Word Break","word-break","M"],["Permutations","permutations","M"],["Course Schedule II","course-schedule-ii","M"],["Kth Smallest Element in a BST","kth-smallest-element-in-a-bst","M"],["Maximum Subarray","maximum-subarray","M"]],true]
+];
+const CORE_COUNT=P.filter(g=>!g[2]).reduce((n,g)=>n+g[1].length,0);
+const CHECK=[
+ ["Java / Spring",["equals/hashCode contract; HashMap internals (buckets, treeification, resize)","Checked vs unchecked exceptions; try-with-resources","Streams: map/filter/collect/groupingBy; Optional misuse","final/immutability; String pool; generics wildcards (PECS)","Concurrency: synchronized vs ReentrantLock, volatile, ExecutorService, CompletableFuture, ConcurrentHashMap","Spring: bean scopes, DI types, @Transactional propagation and self-invocation, auto-config, profiles, Actuator","JPA: N+1, lazy vs eager, @Version optimistic locking, fetch joins"]],
+ ["Backend / DB",["Composite index column order; covering index; reading EXPLAIN","ACID; isolation levels and the anomaly each prevents","Optimistic vs pessimistic locking; deadlocks","Cache-aside, TTL, invalidation, stampede","REST: idempotency keys, status codes, offset vs cursor pagination, versioning","Auth: session vs JWT, OAuth2 access vs refresh, bcrypt/argon2, OWASP Top 10","Queues: at-least-once delivery, idempotent consumers, outbox pattern"]],
+ ["JS / Node",["Event loop phases, microtasks vs macrotasks, process.nextTick","Promise.all / allSettled / race, async error handling","Closures, this, prototypes; hooks rules, useEffect deps, React Query cache"]],
+ ["Tooling",["Multi-stage Dockerfile from memory; docker-compose with a DB","GitHub Actions workflow: build, test, cache","JUnit 5 + Mockito; Testcontainers; Jest","Git: rebase vs merge, switch, bisect"]],
+ ["Interview mechanics",["LeetCode easy < 15 min, medium < 30 min, talking the whole time","90-second spoken OnSite pitch with numbers","Three STAR stories (conflict, production bug, ownership)"]]
+];
+const CHEAT=["Big-O of every structure you use; hash map vs tree map trade-offs","Two pointers, sliding window, BFS/DFS, heap top-K, binary search on answers","equals/hashCode; immutability; ConcurrentHashMap; volatile vs locks","@Transactional propagation, rollback rules, self-invocation proxy pitfall","N+1 queries and fetch joins; optimistic (@Version) vs pessimistic locking","Isolation levels → dirty, non-repeatable and phantom reads","Composite index left-prefix rule; covering index; EXPLAIN","Cache-aside + TTL + invalidation; idempotency keys; retries with backoff","OAuth2 access vs refresh tokens; JWT pitfalls (no revocation, keep short-lived); bcrypt","REST: correct status codes, PUT vs PATCH vs POST idempotency, cursor pagination","Outbox pattern and at-least-once delivery → idempotent consumers","Node event loop: microtasks run before macrotasks","Testing pyramid; mocks vs Testcontainers","Multi-stage Docker builds; CI = build → test → artifact","System design script: requirements → API → schema → bottleneck → cache/replica/queue → trade-offs"];
+const PROMPTS=[
+ ["Daily quiz","Give me 10 Turing-style MCQs on [topic], 4 options, some multi-answer, one at a time. Don't reveal answers until I commit. Score me and tag each miss for spaced repetition."],
+ ["Mock Zara","Act as micro1's Zara interviewing me for a Java/Spring Boot backend role. Start from my resume, ask adaptive follow-ups on every technology I mention, give me 10 seconds of patience max, then a 25-minute coding question I must narrate. Afterwards, score technical depth, communication, and consistency with my CV."],
+ ["Turing-style mock","Give me 2 unseen LeetCode-medium problems; I have 60 minutes. Then review my code for correctness, complexity, naming, and edge cases."],
+ ["Code-review drill","Paste a 60-line Spring service with 8 hidden issues (N+1, missing transaction, race condition, SQL injection, swallowed exception…). I'll list the issues and fixes; grade me."],
+ ["Explain-it-back","I'll explain [concept] as if to a junior dev in under 2 minutes. Interrupt with 'why?' three times, then score me 0–2."],
+ ["Review my solution","Review this solution like a senior engineer: correctness, complexity, naming, edge cases. Then ask me the follow-up question an interviewer would ask.\n\n[paste code]"],
+ ["English polish","Rewrite my answer to sound concise and natural in spoken English, and flag my filler words.\n\n[paste answer]"]
+];
+const RANKS=[[0,"Intern"],[100,"Junior I"],[250,"Junior II"],[450,"Mid I"],[700,"Mid II"],[1000,"Senior"],[1400,"Staff"],[1900,"Principal"],[2500,"Hired"]];
+function rankOf(x){let i=0;RANKS.forEach((r,k)=>{if(x>=r[0])i=k});return i}
+
+/* ---------- State ---------- */
+const LS="vetting-sprint-v1";
+function iso(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+const todayIso=()=>iso(new Date());
+function addDays(s,n){const d=new Date(s+"T00:00:00");d.setDate(d.getDate()+n);return iso(d)}
+function diffDays(a,b){return Math.round((new Date(b+"T00:00:00")-new Date(a+"T00:00:00"))/864e5)}
+function blank(){return{start:"2026-10-16",blocks:{},probs:{},check:{},zara:{},notes:{},gates:{},active:{},updated:0}}
+let S=blank();
+try{const raw=localStorage.getItem(LS);if(raw)S=Object.assign(blank(),JSON.parse(raw))}catch(e){}
+let dbRef=null, saveT=null;
+
+function save(){
+  try{afterChange()}catch(e){}
+  S.updated=Date.now();
+  try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}
+
+}
+function setSync(t){document.getElementById("sync").textContent=t}
+function markActive(){S.active[todayIso()]=true}
+
+/* ---------- Levels ---------- */
+const DAYP={1:["Two Sum","Valid Anagram"],2:["Contains Duplicate","Valid Palindrome","Best Time to Buy and Sell Stock"],3:["Group Anagrams","Top K Frequent Elements"],4:["Valid Parentheses","Min Stack"],5:["Longest Substring Without Repeating Characters","Product of Array Except Self"],6:["3Sum","Container With Most Water"],8:["Binary Search","Search in Rotated Sorted Array"],9:["Reverse Linked List","Merge Two Sorted Lists","Linked List Cycle"],10:["Invert Binary Tree","Maximum Depth of Binary Tree","Balanced Binary Tree"],11:["Binary Tree Level Order Traversal","Validate Binary Search Tree"],12:["Lowest Common Ancestor of a BST","Time Based Key-Value Store"],15:["Number of Islands","Flood Fill"],16:["Rotting Oranges","Course Schedule"],17:["Kth Largest Element in an Array","K Closest Points to Origin"],18:["Merge Intervals"],19:["Insert Interval","Climbing Stairs"],20:["House Robber","Coin Change"],23:["LRU Cache","Implement Trie"],24:["Clone Graph","Subsets"]};
+const STRETCH={7:["Daily Temperatures","Maximum Subarray"],14:["Permutations"],21:["Word Break","Course Schedule II"],28:["Kth Smallest Element in a BST"]};
+const SKIP={2:[["Java / Spring",0]],3:[["Java / Spring",1],["Java / Spring",2]],4:[["Java / Spring",5]],5:[["Java / Spring",5],["Java / Spring",6]],9:[["Backend / DB",0],["Backend / DB",1]],11:[["Backend / DB",3]],12:[["Backend / DB",5]],15:[["Tooling",2]],16:[["Tooling",2]],17:[["Tooling",0]],18:[["Tooling",1]],20:[["Java / Spring",4],["Backend / DB",2]],21:[["JS / Node",0],["JS / Node",1]]};
+const PMAP={};P.forEach(g=>g[1].forEach(p=>PMAP[p[0]]=p));
+const LEVELS_UI=[["Baseline","Zara check"],["Week 1",WEEKS[0]],["Week 2",WEEKS[1]],["Week 3",WEEKS[2]],["Week 4",WEEKS[3]]];
+const weekDays=w=>{const a=[[1,7],[8,14],[15,21],[22,30]][w-1];const o=[];for(let d=a[0];d<=a[1];d++)o.push(d);return o};
+const weekOf=d=>d<=7?1:d<=14?2:d<=21?3:4;
+let selLevel=null, selDay=null;
+
+/* ---------- Derived ---------- */
+function dayDone(d){return [0,1,2].filter(i=>S.blocks[d+"-"+i]).length}
+function baselineCount(){let n=0;CHECK.forEach(g=>g[1].forEach((_,i)=>{if(S.check[g[0]+i]!==undefined&&S.check[g[0]+i]!==null)n++}));return n}
+const CHECK_TOTAL=CHECK.reduce((n,g)=>n+g[1].length,0);
+function baselineDone(){return baselineCount()===CHECK_TOTAL}
+function curDay(){if(!baselineDone())return 0;for(let d=1;d<=30;d++)if(dayDone(d)<3)return d;return 31}
+function curLevel(){const c=curDay();return c===0?0:c>30?4:weekOf(c)}
+function dayUnlocked(d){const c=curDay();return c>0&&d<=c}
+function levelState(L){
+  if(L===0)return baselineDone()?"done":"current";
+  const days=weekDays(L);
+  if(days.every(d=>dayDone(d)===3))return "done";
+  return dayUnlocked(days[0])?"current":"locked";
+}
+function xp(){
+  let x=0;
+  for(const k in S.blocks)if(S.blocks[k])x+=10;
+  for(let d=1;d<=30;d++)if(dayDone(d)===3)x+=15;
+  for(const k in S.probs){const p=S.probs[k];if(p.s==="solo")x+=10;else if(p.s==="hint")x+=5;x+=(p.r||0)*5}
+  for(const k in S.check)if(S.check[k]===2)x+=2;
+  for(const k in S.gates)if(S.gates[k])x+=50;
+  return x;
+}
+function level(x){return rankOf(x)+1}
+function longestStreak(){const ds=Object.keys(S.active).filter(k=>S.active[k]).sort();let best=0,run=0,prev=null;ds.forEach(d=>{run=prev&&diffDays(prev,d)===1?run+1:1;best=Math.max(best,run);prev=d});return best}
+function countProbs(f){let n=0;for(const k in S.probs){const p=S.probs[k];if(p&&p.s&&p.s!=="none"&&f(k,p))n++}return n}
+const STRETCH_SET=new Set(P.filter(g=>g[2]).flatMap(g=>g[1].map(p=>p[0])));
+const BADGES=[
+ ["first","First blood","Solve a problem with no hints",()=>countProbs((k,p)=>p.s==="solo")>=1],
+ ["know","Know thyself","Finish the baseline",()=>baselineDone()],
+ ["ace","Zara-proof","Score 2 on 8 Zara topics",()=>Object.values(S.check).filter(v=>v===2).length>=8],
+ ["ten","Double digits","Solve 10 problems",()=>solvedCore()>=10],
+ ["half","Halfway there","Solve 20 problems",()=>solvedCore()>=20],
+ ["grind","Grind complete","Solve all 40 core problems",()=>solvedCore()>=CORE_COUNT],
+ ["solo10","No training wheels","10 problems solved solo",()=>countProbs((k,p)=>p.s==="solo")>=10],
+ ["stretch","Overachiever","Solve 3 stretch problems",()=>countProbs(k=>STRETCH_SET.has(k))>=3],
+ ["spaced","Spaced out","Log 5 re-solves",()=>Object.values(S.probs).reduce((n,p)=>n+(p.r||0),0)>=5],
+ ["s3","Warming up","3-day streak",()=>longestStreak()>=3],
+ ["s7","On fire","7-day streak",()=>longestStreak()>=7],
+ ["s14","Unstoppable","14-day streak",()=>longestStreak()>=14],
+ ["w1","Week 1 cleared","Finish all of Week 1",()=>levelState(1)==="done"],
+ ["w2","Week 2 cleared","Finish all of Week 2",()=>levelState(2)==="done"],
+ ["w3","Week 3 cleared","Finish all of Week 3",()=>levelState(3)==="done"],
+ ["w4","Sprint finished","Finish all 30 days",()=>levelState(4)==="done"],
+ ["boss","Boss slayer","Clear your first platform gate",()=>Object.values(S.gates).some(Boolean)],
+ ["gauntlet","The gauntlet","Clear all 6 platform gates",()=>GATES.every(g=>S.gates[g.d])],
+ ["journal","Reflective","Write notes on 7 days",()=>Object.values(S.notes).filter(t=>t&&t.trim().length>20).length>=7]
+];
+function earned(){return BADGES.filter(b=>{try{return b[3]()}catch(e){return false}}).map(b=>b[0])}
+let snap=null,lastTap={x:innerWidth/2,y:innerHeight/2};
+addEventListener("pointerdown",e=>{lastTap={x:e.clientX,y:e.clientY}},true);
+function takeSnap(){snap={xp:xp(),rank:rankOf(xp()),badges:new Set(earned())};if(!S.badgesSeen||!S.badgesSeen.length)S.badgesSeen=[...snap.badges]}
+const reduceMotion=matchMedia("(prefers-reduced-motion: reduce)").matches;
+function floatXp(n){
+  const el=document.createElement("div");el.className="xpfloat"+(n<0?" neg":"");el.textContent=(n>0?"+":"")+n+" XP";
+  el.style.left=Math.min(innerWidth-70,Math.max(10,lastTap.x-30))+"px";el.style.top=(lastTap.y-20)+"px";
+  document.body.appendChild(el);setTimeout(()=>el.remove(),1100);
+}
+function confetti(power){
+  if(reduceMotion)return;
+  const c=document.createElement("canvas");c.className="confetti";c.width=innerWidth*devicePixelRatio;c.height=innerHeight*devicePixelRatio;document.body.appendChild(c);
+  const g=c.getContext("2d");g.scale(devicePixelRatio,devicePixelRatio);
+  const cs=getComputedStyle(document.documentElement);const cols=["--accent","--good","--warn","--hot"].map(v=>cs.getPropertyValue(v).trim()||"#2F55D4");
+  const ps=Array.from({length:power||90},()=>({x:innerWidth/2+(Math.random()-.5)*80,y:innerHeight*0.35,vx:(Math.random()-.5)*11,vy:-Math.random()*11-3,r:Math.random()*Math.PI,vr:(Math.random()-.5)*.3,w:6+Math.random()*6,h:4+Math.random()*4,c:cols[Math.floor(Math.random()*cols.length)]}));
+  let t=0;(function step(){t++;g.clearRect(0,0,innerWidth,innerHeight);ps.forEach(p=>{p.vy+=.32;p.vx*=.99;p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;g.save();g.translate(p.x,p.y);g.rotate(p.r);g.fillStyle=p.c;g.fillRect(-p.w/2,-p.h/2,p.w,p.h);g.restore()});if(t<110)requestAnimationFrame(step);else c.remove()})();
+}
+function celebrate(title,sub,kind){
+  const ov=$("celebrate");ov.querySelector(".ck").textContent=kind;ov.querySelector("h2").textContent=title;ov.querySelector("p").textContent=sub;ov.hidden=false;
+  ov.querySelector("button").focus({preventScroll:true});confetti(140);
+}
+function afterChange(){
+  if(!snap)return takeSnap();
+  const x=xp(),r=rankOf(x),b=new Set(earned());
+  const dx=x-snap.xp;if(dx)floatXp(dx);
+  S.badgesSeen=S.badgesSeen||[];
+  const fresh=[...b].filter(id=>!snap.badges.has(id)&&!S.badgesSeen.includes(id));
+  fresh.forEach(id=>S.badgesSeen.push(id));
+  if(r>snap.rank)celebrate(RANKS[r][1],r===RANKS.length-1?"Top rank. Go get the offer.":`Promoted at ${RANKS[r][0]} XP. Next: ${RANKS[r+1][1]} at ${RANKS[r+1][0]} XP.`,"Promotion");
+  else if(fresh.length){const bd=BADGES.find(z=>z[0]===fresh[0]);badgeToast(bd);confetti(60)}
+  snap={xp:x,rank:r,badges:b};
+}
+function badgeToast(bd){const el=$("badgeToast");el.querySelector("b").textContent=bd[1];el.querySelector("span").textContent=bd[2];el.classList.add("show");clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove("show"),2600)}
+function renderTrophies(){
+  const x=xp(),r=rankOf(x),got=new Set(earned());
+  $("trophyBody").innerHTML=`<div class="eyebrow">Career ladder</div><ol class="ladder">${RANKS.map((k,i)=>`<li class="${i<r?"past":i===r?"now":""}"><span>${esc(k[1])}</span><span class="mono">${k[0]} XP</span></li>`).join("")}</ol>
+  <div class="eyebrow" style="margin-top:6px">Badges · ${got.size}/${BADGES.length}</div>
+  <div class="badges">${BADGES.map(b=>`<div class="badge${got.has(b[0])?" got":""}"><div class="medal">${got.has(b[0])?'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.9 6.1 6.6.8-4.9 4.6 1.3 6.5L12 16.8 6.1 20l1.3-6.5L2.5 8.9l6.6-.8z"/></svg>':LOCK}</div><b>${esc(b[1])}</b><small>${esc(b[2])}</small></div>`).join("")}</div>
+  <div class="eyebrow" style="margin-top:6px">How XP works</div>
+  <p class="muted" style="margin:0;font-size:.85rem">Block done +10 · full day +15 · problem with hint +5, solo +10 · each re-solve +5 · Zara topic at 2 +2 · platform gate (boss) +50</p>`;
+}
+function streak(){let n=0,d=todayIso();if(!S.active[d])d=addDays(d,-1);while(S.active[d]){n++;d=addDays(d,-1)}return n}
+function solvedCore(){let n=0;P.forEach(g=>{if(g[2])return;g[1].forEach(p=>{const s=S.probs[p[0]];if(s&&s.s&&s.s!=="none")n++})});return n}
+function dueReviews(){
+  const out=[],t=todayIso();
+  for(const name in S.probs){const s=S.probs[name];if(!s||!s.d||s.s==="none")continue;const r=s.r||0;if(r>=2)continue;const due=addDays(s.d,r===0?3:10);if(due<=t)out.push({name,round:r+1})}
+  return out;
+}
+
+/* ---------- Render ---------- */
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const LOCK='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+function renderStats(){
+  const x=xp(),c=curDay();
+  $("sDay").textContent=c===0?"—":c>30?"30":c;
+  $("sDayLbl").textContent=c===0?"baseline first":c>30?"all done":"day of 30";
+  $("sStreak").textContent=streak();
+  $("sXp").textContent=x;
+  const r=rankOf(x);$("sLvl").textContent=RANKS[r][1];
+  $("rankFill").style.width=(r>=RANKS.length-1?100:((x-RANKS[r][0])/(RANKS[r+1][0]-RANKS[r][0])*100)).toFixed(0)+"%";
+  $("flame").classList.toggle("lit",streak()>0);
+  $("sProb").textContent=solvedCore()+"/"+CORE_COUNT;
+  let total=0;for(let d=1;d<=30;d++)total+=dayDone(d);
+  $("pbar").style.width=((baselineCount()/CHECK_TOTAL*10+total/90*90)).toFixed(1)+"%";
+}
+function renderMap(){
+  $("lvmap").innerHTML=LEVELS_UI.map((l,i)=>{const st=levelState(i);
+    return `<button class="lv ${st}${selLevel===i?" sel":""}" data-level="${i}" aria-current="${selLevel===i}" ${st==="locked"?'aria-disabled="true"':""}>
+      <span class="lvdot">${st==="done"?"✓":st==="locked"?LOCK:i}</span><span class="lvname">${l[0]}</span></button>`}).join('<span class="lvline" aria-hidden="true"></span>');
+}
+function probRow(name,opt){
+  const p=PMAP[name];if(!p)return"";
+  const s=S.probs[name]||{},st=s.s||"none",r=s.r||0;
+  return `<div class="prow"><div class="name"><a href="https://leetcode.com/problems/${p[1]}/" target="_blank" rel="noopener">${esc(name)}</a><small>${p[2]==="E"?"Easy":"Medium"}${opt?" · optional":""}${st!=="none"?` · re-solves ${r}/2`:""}</small></div>
+    <div class="seg" data-prob="${esc(name)}"><button data-s="hint" class="${st==="hint"?"on w":""}">Hint</button><button data-s="solo" class="${st==="solo"?"on g":""}">Solo</button></div></div>`;
+}
+function promptFor(d,i,t){
+  if(i===0&&DAYP[d])return 5;
+  if(/mock zara/i.test(t))return 1;
+  if(/turing-style mock|timed mock/i.test(t))return 2;
+  if(/code-review drill/i.test(t))return 3;
+  if(/explain-it-back/i.test(t))return 4;
+  if(/code review/i.test(t))return 5;
+  if(/mcq|quiz/i.test(t))return 0;
+  if(/pitch/i.test(t))return 6;
+  return -1;
+}
+function renderBaseline(){
+  $("main").innerHTML=`<div id="v-check" class="view" style="margin-top:0"></div>`;
+  renderCheck();
+}
+function renderWeek(w){
+  const days=weekDays(w);
+  if(selDay===null||weekOf(selDay)!==w){const c=curDay();selDay=(c>=days[0]&&c<=days[days.length-1])?c:days[0]}
+  const d=selDay;
+  let h=`<div><div class="eyebrow">Week ${w} · ${WEEKS[w-1]}</div><div class="days">`;
+  days.forEach(x=>{const un=dayUnlocked(x),n=dayDone(x);
+    h+=`<button class="dpill${n===3?" p3":n?" p1":""}${x===d?" sel":""}${un?"":" locked"}${GATE_DAYS.has(x)?" gate":""}" data-day="${x}" aria-label="Day ${x}${un?"":", locked"}">${un?x:LOCK}</button>`});
+  h+=`</div></div>`;
+  if(!dayUnlocked(d)){
+    h+=`<div class="lockcard">${LOCK}<div><h3>Day ${d} is locked</h3><p class="muted" style="margin:0">Finish all three blocks of Day ${d-1} to open it.</p></div></div>`;
+    $("main").innerHTML=h;return;
+  }
+  const g=GATES.find(x=>x.d===d);
+  h+=`<h2>Day ${d}${d===curDay()?` <span class="pill ok" style="vertical-align:middle">current</span>`:dayDone(d)===3?` <span class="pill" style="vertical-align:middle">done</span>`:""}</h2>`;
+  if(g){const on=!!S.gates[g.d];const hp=4-dayDone(d)-(on?1:0);h+=`<div class="boss${hp<=0?" down":""}"><div class="bosstop"><div><div class="eyebrow">Boss fight · Day ${d}</div><h3>${esc(g.t)}</h3></div><span class="mono">${hp<=0?"DEFEATED":`HP ${hp}/4`}</span></div>
+    <div class="hp"><i style="width:${Math.max(0,hp)/4*100}%"></i></div><p class="muted" style="margin:0;font-size:.88rem">${esc(g.n)} Each block you finish lands a hit; taking the real assessment is the final blow (+50 XP).</p>
+    <button class="btn${on?"":" primary"}" data-gate="${g.d}">${on?"Cleared · undo":"I took it: final blow"}</button></div>`}
+  DAYS[d-1].forEach((txt,i)=>{
+    const k=d+"-"+i,on=!!S.blocks[k];
+    const skipKeys=i===1&&SKIP[d];const canSkip=skipKeys&&skipKeys.every(([gn,ix])=>S.check[gn+ix]===2);
+    const pi=promptFor(d,i,txt);
+    h+=`<div class="block${on?" done":""}"><button class="check" data-blk="${k}" aria-pressed="${on}" aria-label="Mark block ${BLOCKS[i][0]} done">${on?"✓":""}</button>
+      <div class="bbody"><div class="meta">Block ${BLOCKS[i][0]} · ${BLOCKS[i][1]}</div><p>${esc(txt)}</p>`;
+    if(canSkip)h+=`<div class="skipnote">You scored 2 on this in the Zara check. Skip it: do the weekend stretch problems instead, then tick the block.</div>`;
+    if(i===0&&DAYP[d])h+=`<div class="plist">${DAYP[d].map(n=>probRow(n)).join("")}</div>`;
+    if(i===2&&d===29)h+=`<ol class="cheat">${CHEAT.map(c=>`<li><span>${esc(c)}</span></li>`).join("")}</ol>`;
+    if(pi>=0)h+=`<details class="pdet"><summary>Prompt for Claude · ${esc(PROMPTS[pi][0])}</summary><code id="pr-${d}-${i}">${esc(PROMPTS[pi][1])}</code><button class="btn primary" data-copy="${pi}" data-src="pr-${d}-${i}">Copy prompt</button></details>`;
+    h+=`</div></div>`;
+  });
+  if(STRETCH[d])h+=`<div><div class="eyebrow" style="margin-bottom:6px">Weekend stretch · optional</div><div class="plist">${STRETCH[d].map(n=>probRow(n,true)).join("")}</div></div>`;
+  if(d===curDay()){const due=dueReviews();if(due.length)h+=`<div class="due"><h3>Due for re-solve</h3><p class="muted" style="margin:2px 0 8px;font-size:.85rem">Solve these cold, then log it. Fits in Block C.</p><div class="plist">${due.map(x=>`<div class="prow"><div class="name"><a href="https://leetcode.com/problems/${PMAP[x.name][1]}/" target="_blank" rel="noopener">${esc(x.name)}</a><small>review ${x.round} of 2</small></div><div class="seg" data-prob="${esc(x.name)}"><button data-s="rev">Re-solved</button></div></div>`).join("")}</div></div>`}
+  if(d===30&&dayDone(30)===3)h+=`<div class="zcard result"><h2>Sprint complete</h2><p style="margin:0">Thirty days, ${solvedCore()} core problems, ${xp()} XP. Bring your retrospective to chat and we'll plan the next 30 days.</p></div>`;
+  h+=`<div><div class="eyebrow" style="margin-bottom:6px">Notes for day ${d}</div><textarea id="note" placeholder="What tripped you up? What will you say differently next time?">${esc(S.notes[d]||"")}</textarea></div>`;
+  $("main").innerHTML=h;
+  $("note").oninput=e=>{S.notes[d]=e.target.value;save()};
+}
+function renderMain(){
+  if(selLevel===null||levelState(selLevel)==="locked")selLevel=curLevel();
+  renderMap();
+  if(selLevel===0)renderBaseline();else renderWeek(selLevel);
+}
+function renderAll(){renderStats();renderMain()}
+
+/* ---------- Zara-style self-assessment ---------- */
+const MAX_ANS=3, ANS_SECS=90;
+const Z={active:false,group:null,queue:[],idx:0,turns:[],answers:0,busy:false,err:null,scored:null,draft:"",left:ANS_SECS,timerOn:true,results:[],tick:null};
+let sampleFn=null;
+const KEY_LS=LS+"-apikey", MODEL_LS=LS+"-model";
+function getKey(){try{return localStorage.getItem(KEY_LS)||""}catch(e){return ""}}
+function getModel(){try{return localStorage.getItem(MODEL_LS)||"claude-sonnet-5-5"}catch(e){return "claude-sonnet-5-5"}}
+function makeSample(){
+  if(!getKey())return null;
+  return {json:async(prompt)=>{
+    if(!navigator.onLine){const e=new Error("offline");e.code="offline";throw e}
+    let res;
+    try{res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"content-type":"application/json","x-api-key":getKey(),"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:getModel(),max_tokens:700,messages:[{role:"user",content:prompt}]})})}
+    catch(err){const e=new Error("network");e.code="offline";throw e}
+    if(!res.ok){const e=new Error("http");e.code=res.status===401||res.status===403?"bad_key":res.status===429||res.status===529?"rate_limited":res.status===404?"bad_model":"http_"+res.status;throw e}
+    const data=await res.json();
+    const text=(data.content||[]).filter(c=>c.type==="text").map(c=>c.text).join("");
+    const m=text.match(/\{[\s\S]*\}/);
+    if(!m){const e=new Error("json");e.code="invalid_json";throw e}
+    try{return JSON.parse(m[0])}catch(_){const e=new Error("json");e.code="invalid_json";throw e}
+  }};
+}
+function zItems(gName,rescore){
+  const out=[];
+  CHECK.forEach(g=>{if(gName!=="All"&&g[0]!==gName)return;g[1].forEach((t,i)=>{const k=g[0]+i;if(rescore||S.check[k]===undefined)out.push({k,t,g:g[0]})})});
+  return out;
+}
+function zPrompt(it,force){
+  const tr=Z.turns.map(t=>(t.who==="zara"?"Zara: ":"Candidate: ")+t.text).join("\n");
+  return `You are Zara, micro1's AI technical interviewer, assessing a candidate for a remote Java/Spring Boot backend (full-stack with React) role.
+Candidate: Amr, about 1 year as a software engineer on a multi-tenant construction platform serving 700+ companies (Java, Spring Boot, JHipster, React, MySQL, REST APIs, company-scoped RBAC, ledger and payment workflows). Also built Node/Express/Next.js projects.
+Topic being assessed: "${it.t}" (area: ${it.g}).
+
+How you work:
+- Ask ONE short, spoken-style question at a time (max 2 sentences). No preamble, no praise, no hints, no teaching.
+- Adapt to the last answer: if it was solid, go one level deeper or ask for a trade-off or edge case. If it was vague or wrong, ask a simpler, more concrete angle. If the candidate named a specific technology, method or term, probe it ("You mentioned X. How does...").
+- Ground questions in real backend scenarios where you can, such as their ledger, payments or multi-tenant RBAC.
+- If the candidate asked you to repeat, rephrase your last question more plainly. That is not an answer.
+- "I don't know", "(no answer, time ran out)" and off-topic replies count as weak answers.
+- Score when you have enough signal, or once the candidate has given ${MAX_ANS} answers.
+Scoring: 0 = cannot explain it. 1 = partial or shaky, breaks under follow-up. 2 = correct, precise, and held up under follow-ups.
+
+Conversation so far:
+${tr||"(none yet: ask the opening question)"}
+${force?`\nThe candidate has given ${MAX_ANS} answers. You must score now.`:""}
+Reply with JSON only, exactly one of:
+{"type":"question","text":"..."}
+{"type":"score","score":0,"feedback":"two sentences: what was right and what was missing","study":"one line naming exactly what to review"}`;
+}
+async function zStep(){
+  const it=Z.queue[Z.idx];if(!it||!sampleFn)return;
+  Z.busy=true;Z.err=null;stopTick();renderCheck();
+  try{
+    const r=await sampleFn.json(zPrompt(it,Z.answers>=MAX_ANS),{modelTier:"default"});
+    if(r&&r.type==="score"&&[0,1,2].includes(+r.score)){
+      const sc=+r.score;Z.scored={score:sc,feedback:String(r.feedback||""),study:String(r.study||"")};
+      S.check[it.k]=sc;S.zara=S.zara||{};S.zara[it.k]={f:Z.scored.feedback,st:Z.scored.study,d:todayIso()};
+      Z.results.push({it,score:sc,study:Z.scored.study});markActive();save();renderStats();renderMap();
+    }else if(r&&r.text&&Z.answers<MAX_ANS){
+      Z.turns.push({who:"zara",text:String(r.text)});Z.left=ANS_SECS;
+    }else{Z.busy=false;Z.answers=MAX_ANS;return zStep()}
+  }catch(e){
+    Z.err=e&&e.code==="rate_limited"?"Zara is busy or rate-limited. Wait a minute, then retry.":e&&e.code==="bad_key"?"Your API key was rejected. Check it under Settings at the bottom, then retry.":e&&e.code==="offline"?"You're offline. Zara needs internet; the rest of the app works without it.":e&&e.code==="bad_model"?"That model name wasn't found. Fix it under Settings, then retry.":"Zara couldn't respond ("+esc((e&&e.code)||"error")+"). Retry when ready.";
+  }
+  Z.busy=false;renderCheck();
+  if(!Z.scored&&!Z.err)startTick();
+}
+function zAnswer(text){
+  const t=(text||"").trim();
+  Z.turns.push({who:"amr",text:t||"(no answer, time ran out)"});Z.answers++;Z.draft="";zStep();
+}
+function startTick(){
+  stopTick();if(!Z.timerOn)return;
+  Z.tick=setInterval(()=>{
+    Z.left--;const el=$("zTime"),bar=$("zBar");
+    if(el)el.textContent=Z.left+"s";if(bar)bar.style.width=(Z.left/ANS_SECS*100)+"%";
+    if(Z.left<=0){stopTick();zAnswer(Z.draft)}
+  },1000);
+}
+function stopTick(){if(Z.tick){clearInterval(Z.tick);Z.tick=null}}
+function zStart(group,rescore){
+  const q=zItems(group,rescore);
+  if(!q.length){toast("Every topic here is scored. Tick “Re-assess” to go again.");return}
+  Object.assign(Z,{active:true,group,queue:q,idx:0,turns:[],answers:0,scored:null,err:null,draft:"",results:[],left:ANS_SECS});
+  renderCheck();zStep();
+}
+function zNext(){Z.idx++;Z.turns=[];Z.answers=0;Z.scored=null;Z.draft="";Z.left=ANS_SECS;renderCheck();if(Z.idx<Z.queue.length)zStep()}
+function zEnd(){stopTick();Z.active=false;renderAll()}
+const SCORE_LBL=["0 · can't explain","1 · shaky","2 · solid"];
+function renderZara(){
+  const el=$("v-check");if(!el)return;
+  if(Z.idx>=Z.queue.length){
+    const weak=Z.results.filter(r=>r.score<2);
+    el.innerHTML=`<div class="zcard"><div class="eyebrow">Session complete · ${esc(Z.group)}</div><h2>${Z.results.filter(r=>r.score===2).length} of ${Z.results.length} solid</h2>
+    ${weak.length?`<p style="margin:0">Your study focus, weakest first:</p><ol class="zfocus">${weak.sort((a,b)=>a.score-b.score).map(r=>`<li><span class="sc s${r.score}">${r.score}</span><div><b>${esc(r.it.t)}</b><small>${esc(r.study)}</small></div></li>`).join("")}</ol>`:`<p style="margin:0">Everything held up. Those topics are skippable; put the time into problems.</p>`}
+    <button class="btn primary" data-z="back">Back to checklist</button></div>`;
+    return;
+  }
+  const it=Z.queue[Z.idx];
+  const waiting=!Z.busy&&!Z.scored&&!Z.err&&Z.turns.length&&Z.turns[Z.turns.length-1].who==="zara";
+  let h=`<div class="zhead"><div><div class="eyebrow">Zara · ${esc(it.g)} · topic ${Z.idx+1} of ${Z.queue.length}</div><h3>${esc(it.t)}</h3></div><button class="btn" data-z="end">End</button></div>
+  <div class="bar" aria-hidden="true"><i style="width:${Z.idx/Z.queue.length*100}%"></i></div><div class="chat">`;
+  Z.turns.forEach(t=>{h+=`<div class="msg ${t.who}"><span class="who">${t.who==="zara"?"Zara":"You"}</span>${esc(t.text)}</div>`});
+  if(Z.busy)h+=`<div class="msg zara thinking"><span class="who">Zara</span>Listening…</div>`;
+  h+=`</div>`;
+  if(Z.err)h+=`<div class="flag"><span>!</span><div>${Z.err} <button class="btn" data-z="retry" style="margin-top:6px">Retry</button></div></div>`;
+  if(waiting){
+    h+=`<div class="answer"><div class="tline"><span class="muted" style="font-size:.8rem">Answer ${Z.answers+1} of up to ${MAX_ANS}. Write it as you'd say it.</span>${Z.timerOn?`<span class="mono" id="zTime">${Z.left}s</span>`:""}</div>
+    ${Z.timerOn?`<div class="bar tbar"><i id="zBar" style="width:${Z.left/ANS_SECS*100}%"></i></div>`:""}
+    <textarea id="zAns" placeholder="Talk it through: what it is, why it matters, an example from your work…">${esc(Z.draft)}</textarea>
+    <div class="zbtns"><button class="btn primary" data-z="send">Send answer</button><button class="btn" data-z="repeat">Can you rephrase that?</button><button class="btn" data-z="idk">I don't know</button></div></div>`;
+  }
+  if(Z.scored){
+    h+=`<div class="zcard result"><div class="eyebrow">Score</div><div><span class="sc s${Z.scored.score} big">${SCORE_LBL[Z.scored.score]}</span></div><p style="margin:0">${esc(Z.scored.feedback)}</p>${Z.scored.score<2?`<p style="margin:0" class="muted"><b>Review:</b> ${esc(Z.scored.study)}</p>`:""}
+    <button class="btn primary" data-z="next">${Z.idx+1<Z.queue.length?"Next topic":"See summary"}</button></div>`;
+  }
+  el.innerHTML=h;
+  const ta=$("zAns");if(ta){ta.oninput=e=>{Z.draft=e.target.value};ta.focus({preventScroll:true})}
+}
+function renderCheck(){
+  if(!$("v-check"))return;
+  if(Z.active)return renderZara();
+  const bc=baselineCount();
+  let skip=0,tot=0;CHECK.forEach(g=>g[1].forEach((_,i)=>{tot++;if(S.check[g[0]+i]===2)skip++}));
+  const groups=[["All",tot]].concat(CHECK.map(g=>[g[0],g[1].length]));
+  let h=(bc===CHECK_TOTAL?`<div class="zcard result"><div class="eyebrow">Baseline complete</div><h2>Week 1 is unlocked</h2><p style="margin:0" class="muted">Topics you scored 2 will be marked skippable inside the weeks.</p><button class="btn primary" data-startweek>Start Week 1</button></div>`:`<div class="lockcard">${LOCK}<div><h3>Baseline: ${bc} of ${CHECK_TOTAL} topics scored</h3><p class="muted" style="margin:0">Score every topic, with Zara or by hand, to unlock Week 1.</p></div></div>`)+`<div class="zcard"><div class="eyebrow">Assess me like Zara</div><h2>Pick an area. Zara interviews you on each topic.</h2>
+  <p style="margin:0" class="muted">One question at a time. Solid answers get a harder follow-up, weak ones get a simpler angle, and any tech you name gets probed. Up to ${MAX_ANS} answers per topic, then a 0–2 score lands in the list below.</p>
+  <div class="chips">${groups.map(([g,n])=>{const done=g==="All"?bc:CHECK.find(c=>c[0]===g)[1].filter((_,i)=>S.check[g+i]!==undefined).length;return `<button class="chip" data-zstart="${esc(g)}">${esc(g)} <span class="mono">${done}/${n}</span></button>`}).join("")}</div>
+  <div class="settings"><label><input type="checkbox" id="zTimerOpt" ${Z.timerOn?"checked":""}> ${ANS_SECS}-second answer timer (Zara moves on)</label></div>
+  <div class="settings"><label><input type="checkbox" id="zRescore"> Re-assess topics already scored</label></div>
+  ${sampleFn?"":`<div class="keybox"><b>Zara needs an Anthropic API key</b><p class="muted" style="margin:0;font-size:.85rem">Create one at console.anthropic.com (API usage is billed separately from your Claude plan; a full baseline costs a few cents). The key stays on this phone. Or rate topics by hand below.</p><div class="settings"><input id="keyIn" type="password" placeholder="sk-ant-…" autocomplete="off" style="flex:1;min-width:0"><button class="btn primary" id="keySave">Save key</button></div></div>`}
+  </div>
+  <p class="muted" style="margin:0"><span class="mono">${skip}/${tot}</span> topics at 2 are skippable. You can also set a score by hand.</p><div class="list">`;
+  CHECK.forEach(g=>{
+    h+=`<div class="grp">${esc(g[0])}</div>`;
+    g[1].forEach((t,i)=>{
+      const k=g[0]+i,v=S.check[k],zr=S.zara&&S.zara[k];
+      h+=`<div class="row"><div class="name">${esc(t)}${zr?`<small>${esc(zr.f)}${v<2&&zr.st?` <b>Review:</b> ${esc(zr.st)}`:""}</small>`:""}</div><div class="seg" data-chk="${esc(k)}">
+        ${[0,1,2].map(n=>`<button data-v="${n}" class="${v===n?"on"+(n===2?" g":n===1?" w":""):""}" aria-label="Rate ${n}">${n}</button>`).join("")}</div></div>`;
+    });
+  });
+  $("v-check").innerHTML=h+`</div>`;
+  $("zTimerOpt").onchange=e=>{Z.timerOn=e.target.checked};
+  const ks=$("keySave");if(ks)ks.onclick=()=>{const v=$("keyIn").value.trim();if(!v){toast("Paste your key first");return}try{localStorage.setItem(KEY_LS,v)}catch(e){}sampleFn=makeSample();renderCheck();renderKeySettings();toast("Key saved. Zara is ready")};
+}
+document.addEventListener("click",e=>{
+  const st=e.target.closest("[data-zstart]");
+  if(st){if(!sampleFn){toast("Add your API key first");return}zStart(st.dataset.zstart,$("zRescore").checked);return}
+  const b=e.target.closest("[data-z]");if(!b)return;
+  const a=b.dataset.z;
+  if(a==="send"){const v=($("zAns")||{}).value||"";if(!v.trim()){toast("Type your answer, or tap “I don't know”");return}zAnswer(v)}
+  else if(a==="idk")zAnswer("I don't know.");
+  else if(a==="repeat"){Z.turns.push({who:"amr",text:"Can you rephrase that?"});zStep()}
+  else if(a==="next")zNext();
+  else if(a==="retry")zStep();
+  else if(a==="end"||a==="back")zEnd();
+});
+/* ---------- Events ---------- */
+function toast(t){const el=$("toast");el.textContent=t;el.classList.add("show");clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove("show"),1800)}
+document.addEventListener("click",async e=>{
+  const lv=e.target.closest("[data-level]");
+  if(lv){const L=+lv.dataset.level;if(levelState(L)==="locked"){toast(`Finish ${LEVELS_UI[L-1][0]} to unlock ${LEVELS_UI[L][0]}`);return}if(Z.active&&L!==0){toast("End the Zara session first");return}selLevel=L;selDay=null;renderMain();return}
+  const dp=e.target.closest("[data-day]");
+  if(dp){const d=+dp.dataset.day;if(!dayUnlocked(d)){toast(`Finish Day ${d-1} to unlock Day ${d}`);return}selDay=d;renderMain();return}
+  if(e.target.closest("[data-startweek]")){selLevel=1;selDay=1;renderMain();window.scrollTo({top:0});return}
+  const blk=e.target.closest("[data-blk]");
+  if(blk){const k=blk.dataset.blk,d=+k.split("-")[0];const was=curLevel();S.blocks[k]=!S.blocks[k];
+    if(S.blocks[k]){markActive();if(dayDone(d)===3){if(d<30){toast(`Day ${d} complete · Day ${d+1} unlocked`);}else toast("Sprint complete")}}
+    save();if(dayDone(d)===3&&d<30&&curDay()===d+1)selDay=d+1;if(curLevel()!==was&&S.blocks[k]){selLevel=curLevel();selDay=null;toast(`${LEVELS_UI[selLevel][0]} unlocked`)}
+    renderAll();if(selDay!==d)window.scrollTo({top:0});return}
+  const ps=e.target.closest(".seg[data-prob] button");
+  if(ps){const name=ps.parentElement.dataset.prob,s=ps.dataset.s,cur=S.probs[name]||{s:"none",r:0};
+    if(s==="rev"){cur.r=(cur.r||0)+1;toast("Re-solve logged · +5 XP")}
+    else if(cur.s===s){cur.s="none";cur.d=null;cur.r=0}
+    else{if(cur.s==="none"||!cur.d)cur.d=todayIso();cur.s=s}
+    S.probs[name]=cur;markActive();save();renderAll();return}
+  const ck=e.target.closest(".seg[data-chk] button");
+  if(ck){const k=ck.parentElement.dataset.chk,v=+ck.dataset.v;if(S.check[k]===v)delete S.check[k];else S.check[k]=v;save();renderAll();return}
+  const gt=e.target.closest("[data-gate]");
+  if(gt){const d=gt.dataset.gate;S.gates[d]=!S.gates[d];if(S.gates[d]){markActive();toast("Gate cleared · +50 XP")}save();renderAll();return}
+  const cp=e.target.closest("[data-copy]");
+  if(cp){const txt=PROMPTS[+cp.dataset.copy][1];
+    try{await navigator.clipboard.writeText(txt);toast("Copied")}
+    catch(err){const src=$(cp.dataset.src);if(src){const r=document.createRange();r.selectNodeContents(src);const sel=getSelection();sel.removeAllRanges();sel.addRange(r)}toast("Selected. Copy it manually")}
+  }
+});
+$("rankBtn").onclick=()=>{renderTrophies();$("trophies").hidden=false};
+document.addEventListener("click",e=>{const c=e.target.closest("[data-close]");if(c){$(c.dataset.close).hidden=true;return}if(e.target.classList.contains("overlay"))e.target.hidden=true});
+addEventListener("keydown",e=>{if(e.key==="Escape")document.querySelectorAll(".overlay").forEach(o=>o.hidden=true)});
+$("resetBtn").onclick=()=>{$("resetAsk").hidden=false};
+$("resetNo").onclick=()=>{$("resetAsk").hidden=true};
+$("resetYes").onclick=()=>{S=blank();snap=null;save();selLevel=null;selDay=null;$("resetAsk").hidden=true;renderAll();toast("Progress reset")};
+
+/* ---------- Theme ---------- */
+function applyTheme(t){
+  if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);
+  else document.documentElement.removeAttribute("data-theme");
+  document.querySelectorAll("[data-theme-set]").forEach(b=>{const on=b.dataset.themeSet===(t||"auto");b.classList.toggle("on",on);b.setAttribute("aria-pressed",on)});
+}
+let theme="auto";try{theme=localStorage.getItem(LS+"-theme")||"auto"}catch(e){}
+applyTheme(theme);
+$("themeSeg").addEventListener("click",e=>{const b=e.target.closest("[data-theme-set]");if(!b)return;theme=b.dataset.themeSet;try{localStorage.setItem(LS+"-theme",theme)}catch(e){}applyTheme(theme)});
+
+/* ---------- Settings: key, model, backup ---------- */
+function renderKeySettings(){
+  const k=getKey();
+  $("keyState").textContent=k?"Saved ("+k.slice(0,10)+"…)":"Not set";
+  $("modelIn").value=getModel();
+}
+$("keyEdit").onclick=()=>{const v=$("keyIn2").value.trim();try{if(v)localStorage.setItem(KEY_LS,v);else localStorage.removeItem(KEY_LS)}catch(e){}$("keyIn2").value="";sampleFn=makeSample();renderKeySettings();renderCheck();toast(v?"Key saved":"Key removed")};
+$("modelIn").onchange=e=>{try{localStorage.setItem(MODEL_LS,e.target.value.trim()||"claude-sonnet-5-5")}catch(_){}toast("Model saved")};
+$("exportBtn").onclick=async()=>{
+  const txt=JSON.stringify(S);
+  try{const blob=new Blob([txt],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="vetting-sprint-backup-"+todayIso()+".json";document.body.appendChild(a);a.click();a.remove();toast("Backup saved")}catch(e){}
+  try{await navigator.clipboard.writeText(txt)}catch(e){}
+};
+$("importBtn").onclick=()=>$("importFile").click();
+$("importFile").onchange=async e=>{
+  const f=e.target.files[0];if(!f)return;
+  try{const obj=JSON.parse(await f.text());if(!obj||typeof obj!=="object"||!obj.blocks)throw 0;S=Object.assign(blank(),obj);save();selLevel=null;selDay=null;renderAll();toast("Progress restored")}
+  catch(_){toast("That file isn't a Vetting Sprint backup")}
+  e.target.value="";
+};
+
+/* ---------- Boot ---------- */
+sampleFn=makeSample();
+renderKeySettings();
+renderAll();
+setSync(navigator.onLine?"Saved on this phone":"Offline · saved on this phone");
+addEventListener("online",()=>setSync("Saved on this phone"));
+addEventListener("offline",()=>setSync("Offline · saved on this phone"));
+if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+</script>
+
+</body>
+</html>
